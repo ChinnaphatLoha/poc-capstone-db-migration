@@ -1,0 +1,19 @@
+name: Flyway Migrate Dev
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  migrate-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Flyway migration (Dev)
+        run: |
+          docker run --rm \
+            -v $PWD/migrations:/flyway/sql \
+            -v $PWD/conf:/flyway/conf \
+            -e FLYWAY_USER=${{ secrets.DEV_DB_USER }} \
+            -e FLYWAY_PASS=${{ secrets.DEV_DB_PASS }} \
+            flyway/flyway:11.11 \
+            -configFiles=/flyway/conf/flyway-dev.conf migrate

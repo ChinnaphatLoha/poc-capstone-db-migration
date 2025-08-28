@@ -1,0 +1,1 @@
+CREATE INDEX CONCURRENTLY idx_users_username ON users(username);

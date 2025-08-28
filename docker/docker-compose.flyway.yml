@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: flyway_demo
+      POSTGRES_USER: flyway_user
+      POSTGRES_PASSWORD: flyway_pass
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'flyway_user']
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  flyway:
+    image: flyway/flyway:11.11
+    depends_on:
+      - db
+    volumes:
+      - ./migrations:/flyway/sql:ro
+      - ./conf:/flyway/conf:ro
+    entrypoint: ['/bin/sh', '-c']
+    command: >
+      "until pg_isready -h db -U ${FLYWAY_USER:-flyway_user}; do sleep 1; done
+       &&
+       flyway -configFiles=/flyway/conf/flyway-dev.conf migrate"
+    environment:
+      FLYWAY_USER: ${FLYWAY_USER:-flyway_user}
+      FLYWAY_PASSWORD: ${FLYWAY_PASSWORD:-flyway_pass}
+      FLYWAY_URL: ${FLYWAY_URL:-jdbc:postgresql://db:5432/flyway_demo}
+
+volumes:
+  pgdata:

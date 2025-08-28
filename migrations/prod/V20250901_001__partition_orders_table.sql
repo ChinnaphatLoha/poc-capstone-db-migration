@@ -1,0 +1,1 @@
+ALTER TABLE orders PARTITION BY RANGE (created_at);

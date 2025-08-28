@@ -1,0 +1,10 @@
+# system
+.DS_Store
+/.idea
+/.vscode
+
+# flyway temp
+/flyway.log
+
+# docker
+/tmp/\*
