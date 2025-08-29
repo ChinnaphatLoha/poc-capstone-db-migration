@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:17
+    container_name: poc-capstone-db-migration-db
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: flyway_user
+      POSTGRES_PASSWORD: flyway_pass
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'flyway_user']
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    restart: always
+
+  flyway:
+    image: flyway/flyway:11.11
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./migrations:/flyway/sql:ro
+      - ./conf:/flyway/conf:ro
+    environment:
+      FLYWAY_USER: flyway_user
+      FLYWAY_PASS: flyway_pass
+    command: -configFiles=/flyway/conf/flyway-dev.conf migrate
+    restart: 'no'
+
+  pgadmin:
+    image: dpage/pgadmin4:7
+    container_name: pgadmin_ui
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - '8080:80'
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    restart: always
+
+volumes:
+  pgdata:
+  pgadmin_data:
