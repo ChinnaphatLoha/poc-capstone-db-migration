@@ -8,12 +8,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Run Flyway migration (Staging)
+        env:
+          FLYWAY_USER: ${{ secrets.STG_DB_USER }}
+          FLYWAY_PASSWORD: ${{ secrets.STG_DB_PASS }}
         run: |
           docker run --rm \
-           -v $PWD/migrations:/flyway/sql \
-           -v $PWD/conf:/flyway/conf \
-           -e FLYWAY_USER=${{ secrets.STG_DB_USER }} \
-           -e FLYWAY_PASS=${{ secrets.STG_DB_PASS }} \
-           flyway/flyway:11.11 \
-           -configFiles=/flyway/conf/flyway-staging.conf migrate
+            -v $PWD/migrations:/flyway/sql \
+            -v $PWD/conf:/flyway/conf \
+            -e FLYWAY_USER=$FLYWAY_USER \
+            -e FLYWAY_PASSWORD=$FLYWAY_PASSWORD \
+            flyway/flyway:11.11 \
+            -configFiles=/flyway/conf/flyway-staging.conf migrate

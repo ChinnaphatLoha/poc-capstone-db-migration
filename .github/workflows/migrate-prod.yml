@@ -9,12 +9,16 @@ jobs:
       name: production
     steps:
       - uses: actions/checkout@v4
+
       - name: Run Flyway migration (Prod)
+        env:
+          FLYWAY_USER: ${{ secrets.PROD_DB_USER }}
+          FLYWAY_PASSWORD: ${{ secrets.PROD_DB_PASS }}
         run: |
           docker run --rm \
             -v $PWD/migrations:/flyway/sql \
             -v $PWD/conf:/flyway/conf \
-            -e FLYWAY_USER=${{ secrets.PROD_DB_USER }} \
-            -e FLYWAY_PASS=${{ secrets.PROD_DB_PASS }} \
+            -e FLYWAY_USER=$FLYWAY_USER \
+            -e FLYWAY_PASSWORD=$FLYWAY_PASSWORD \
             flyway/flyway:11.11 \
             -configFiles=/flyway/conf/flyway-prod.conf migrate
